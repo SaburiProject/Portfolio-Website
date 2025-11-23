@@ -857,14 +857,19 @@ function PortfolioPage({ navigateTo }: { navigateTo: (path: string) => void }) {
 
       const startRect = splineContainer.getBoundingClientRect();
       const endRect = resumeBtnPlaceholder.getBoundingClientRect();
-      if (endRect.width === 0) {
-        resumeBtn.style.visibility = 'hidden';
-        return;
-      } else {
-        resumeBtn.style.visibility = 'visible';
-      }
+
+      // Ensure button is visible
+      resumeBtn.style.visibility = 'visible';
+
       const startX = startRect.right - resumeBtn.offsetWidth - 20;
       const startY = startRect.bottom - resumeBtn.offsetHeight - 20;
+
+      if (endRect.width === 0) {
+        // Mobile: Keep it at the start position (on the spline container)
+        resumeBtn.style.transform = `translate(${startX}px, ${startY}px)`;
+        return;
+      }
+
       const endX = endRect.left;
       const endY = endRect.top;
       resumeBtn.style.transform = `translate(${startX + (endX - startX) * easedProgress}px, ${startY + (endY - startY) * easedProgress}px)`;
