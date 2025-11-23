@@ -7,44 +7,50 @@ const Contact: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const form = e.currentTarget; // Capture form reference immediately
         setIsSubmitting(true);
         setNotice({ type: null, message: null });
 
-        const formData = new FormData(e.currentTarget);
+        const formData = new FormData(form);
 
-        // Web3Forms payload
+        // Backend expects JSON payload
         const payload = {
-            access_key: 'YOUR_WEB3FORMS_ACCESS_KEY_HERE', // User needs to replace this
-            name: formData.get('Name'),
-            email: formData.get('Email'),
-            message: formData.get('Message'),
-            subject: 'New Submission from Portfolio Contact Form'
+            Name: formData.get('Name'),
+            Email: formData.get('Email'),
+            Message: formData.get('Message')
         };
 
-        const scriptUrl = 'https://api.web3forms.com/submit';
+        // Google Apps Script Web App URL
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbz5yW6BoNPLVYVHNW4Bx0z8GLvqiSalq9o8paHzaDlrSCiJmyvie_hQh-SKuK5qqEc/exec';
 
         try {
-            const res = await fetch(scriptUrl, {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+            // Google Apps Script usually requires 'no-cors' for client-side fetch
+            // We send as text/plain to avoid preflight, but body is JSON
+            await fetch(scriptUrl, {
                 method: 'POST',
+                body: JSON.stringify(payload),
+                mode: 'no-cors',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Content-Type': 'text/plain;charset=utf-8',
                 },
-                body: JSON.stringify(payload)
+                signal: controller.signal
             });
 
-            const result = await res.json();
+            clearTimeout(timeoutId);
 
-            if (result.success) {
-                setNotice({ type: 'success', message: 'Thank you — your message has been sent!' });
-                (e.currentTarget as HTMLFormElement).reset();
-            } else {
-                console.error('Web3Forms error:', result);
-                setNotice({ type: 'error', message: result.message || 'Something went wrong. Please try again.' });
-            }
-        } catch (err) {
+            // Assume success if no network error occurred
+            setNotice({ type: 'success', message: 'Thank you — your message has been sent!' });
+            form.reset();
+        } catch (err: any) {
             console.error('Form submit error:', err);
-            setNotice({ type: 'error', message: 'Something went wrong. Please try again later.' });
+            if (err.name === 'AbortError') {
+                setNotice({ type: 'error', message: 'Request timed out. Please try again.' });
+            } else {
+                setNotice({ type: 'error', message: 'Something went wrong. Please try again later.' });
+            }
         } finally {
             setIsSubmitting(false);
             // Hide notice after 5 seconds
