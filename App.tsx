@@ -849,21 +849,14 @@ function PortfolioPage({ navigateTo }: { navigateTo: (path: string) => void }) {
     const splineContainer = document.getElementById('spline-container');
     const resumeBtnPlaceholder = document.getElementById('resume-btn-placeholder');
     const handleResumeButtonScroll = () => {
-      const mobilePlaceholder = document.getElementById('mobile-resume-btn-placeholder');
       if (!resumeBtn || !splineContainer || !resumeBtnPlaceholder) return;
-
       const progress = Math.max(0, Math.min(1, window.scrollY / (document.getElementById('hero')!.offsetHeight * 0.8)));
 
       const easeInOutCubic = (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
       const easedProgress = easeInOutCubic(progress);
 
       const startRect = splineContainer.getBoundingClientRect();
-      let endRect = resumeBtnPlaceholder.getBoundingClientRect();
-
-      // Check if desktop placeholder is hidden (width 0) and mobile placeholder exists
-      if (endRect.width === 0 && mobilePlaceholder) {
-        endRect = mobilePlaceholder.getBoundingClientRect();
-      }
+      const endRect = resumeBtnPlaceholder.getBoundingClientRect();
 
       // Ensure button is visible
       resumeBtn.style.visibility = 'visible';
@@ -871,27 +864,15 @@ function PortfolioPage({ navigateTo }: { navigateTo: (path: string) => void }) {
       const startX = startRect.right - resumeBtn.offsetWidth - 20;
       const startY = startRect.bottom - resumeBtn.offsetHeight - 20;
 
-      // If we still don't have a valid end target (e.g. very small screen?), stay at start
-      if (endRect.width === 0 && endRect.height === 0) {
+      if (endRect.width === 0) {
+        // Mobile: Keep it at the start position (on the spline container)
         resumeBtn.style.transform = `translate(${startX}px, ${startY}px)`;
         return;
       }
 
-      let targetEndX = endRect.left;
+      const endX = endRect.left;
       const endY = endRect.top;
-
-      // On mobile, align the right edge of the button to the right edge of the placeholder
-      // to avoid overlapping the hamburger menu which is to the right.
-      if (window.innerWidth < 768 && mobilePlaceholder) {
-        targetEndX = endRect.right - resumeBtn.offsetWidth;
-      }
-
-      resumeBtn.style.transform = `translate(${startX + (targetEndX - startX) * easedProgress}px, ${startY + (endY - startY) * easedProgress}px)`;
-
-      // Optional: Scale down on mobile if needed?
-      if (window.innerWidth < 768) {
-        // resumeBtn.style.transform += ' scale(0.8)'; // Example
-      }
+      resumeBtn.style.transform = `translate(${startX + (endX - startX) * easedProgress}px, ${startY + (endY - startY) * easedProgress}px)`;
     };
     setTimeout(() => {
       handleResumeButtonScroll();
@@ -981,7 +962,6 @@ function PortfolioPage({ navigateTo }: { navigateTo: (path: string) => void }) {
               <span><i className="ph ph-download-simple text-lg"></i> Download Resume</span>
             </div>
           </div>
-          <div id="mobile-resume-btn-placeholder" className="md:hidden mr-2" style={{ width: '1px', height: '1px', visibility: 'hidden' }}></div>
           <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden text-2xl"><i className="ph ph-list"></i></button>
         </nav>
       </header>
