@@ -985,6 +985,13 @@ function PortfolioPage({ navigateTo }: { navigateTo: (path: string) => void }) {
               </a>
             );
           })}
+
+          <a
+            href="https://drive.google.com/uc?export=download&id=1Cq5MVi-D_uD4XSxAYxAFNkDFSiP9VJKz"
+            className="mobile-nav-link text-3xl font-bold my-4 text-sky-300 flex items-center gap-2"
+          >
+            <i className="ph ph-download-simple"></i> Resume
+          </a>
         </div>
       )}
 
