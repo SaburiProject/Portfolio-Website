@@ -877,13 +877,16 @@ function PortfolioPage({ navigateTo }: { navigateTo: (path: string) => void }) {
         return;
       }
 
-      const endX = endRect.left; // Align to left of placeholder
+      let targetEndX = endRect.left;
       const endY = endRect.top;
 
-      // On mobile, we might want to adjust the X position to not overlap hamburger too much if it's tight
-      // But for now, trusting the placeholder position.
+      // On mobile, align the right edge of the button to the right edge of the placeholder
+      // to avoid overlapping the hamburger menu which is to the right.
+      if (window.innerWidth < 768 && mobilePlaceholder) {
+        targetEndX = endRect.right - resumeBtn.offsetWidth;
+      }
 
-      resumeBtn.style.transform = `translate(${startX + (endX - startX) * easedProgress}px, ${startY + (endY - startY) * easedProgress}px)`;
+      resumeBtn.style.transform = `translate(${startX + (targetEndX - startX) * easedProgress}px, ${startY + (endY - startY) * easedProgress}px)`;
 
       // Optional: Scale down on mobile if needed?
       if (window.innerWidth < 768) {
