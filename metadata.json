@@ -1,0 +1,5 @@
+{
+  "name": "Immersive AI Developer Portfolio",
+  "description": "A personal portfolio website for an AI Developer, converted from a static HTML site into a fully interactive React application. It features a three.js shader background, scroll-based animations, and 3D card effects.",
+  "requestFramePermissions": []
+}
